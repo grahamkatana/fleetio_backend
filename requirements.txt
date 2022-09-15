@@ -1,0 +1,10 @@
+Flask 
+Flask-SQLAlchemy
+pymysql
+psycopg2
+cryptography
+flask-migrate
+pandas
+requests
+python-dotenv
+flask_cors
