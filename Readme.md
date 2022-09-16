@@ -18,3 +18,5 @@ you can use any database just install the specific drivers, this project support
 
 ### Mailables added
 ![Screenshot](__previews/Capture4.PNG)
+![Screenshot](__previews/Capture5.PNG)
+
