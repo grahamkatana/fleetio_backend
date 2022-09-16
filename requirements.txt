@@ -8,3 +8,7 @@ pandas
 requests
 python-dotenv
 flask_cors
+flask-bcrypt
+pyjwt
+pillow
+Flask-Mail

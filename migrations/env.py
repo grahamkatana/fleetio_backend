@@ -1,5 +1,5 @@
 from __future__ import with_statement
-from models import Company, Fleet, OnDemand, User
+from models import Company, Fleet, OnDemand, User, PermitType, TransportType
 
 import logging
 from logging.config import fileConfig
