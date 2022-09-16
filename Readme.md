@@ -15,3 +15,6 @@ you can use any database just install the specific drivers, this project support
 
 ### DB Design
 ![Screenshot](__previews/db.png)
+
+### Mailables added
+![Screenshot](__previews/Capture4.PNG)
