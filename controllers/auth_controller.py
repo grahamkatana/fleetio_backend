@@ -147,5 +147,33 @@ def reset(email):
         return message("Please check your email.", 201)
 
 
-def save_new_password(request):
-    print(request)
+def save_new_password(request, otp):
+    now = datetime.now()
+    check_email = User.query.filter_by(email=request['email']).first()
+    print(request['email'])
+    print(check_email.id)
+    # return jsonify(request),200
+    if check_email:
+        email = check_email.email
+        get_otp = OneTimePassword.query.filter_by(
+            user_id=check_email.id).order_by(text("id desc")).first()
+        if not int(get_otp.otp) == int(otp):
+            return message("The given otp does not match", 404)
+        elif get_otp.expires_in < now:
+            return message("This otp has expired", 400)
+        elif not get_otp.is_valid:
+            return message("This otp is not valid", 400)
+
+        check_email.password = bcrypt.generate_password_hash(
+            request['password'])
+        get_otp.is_valid = False
+        db.db.session.commit()
+        identity = {'name': check_email.name, 'user_id': check_email.id, 'joined': check_email.createdAt,
+                    'email': request['email'], 'role': check_email.role, 'cell': check_email.cell, 'status': check_email.status, "email_verified_at": check_email.email_verified_at, }
+        token = encode_jwt(identity)
+        return jsonify({
+            "data": identity,
+            "jwt_token": token
+        }), 200
+    else:
+        return message("The action is not allowed", 401)
