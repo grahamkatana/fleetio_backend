@@ -2,7 +2,7 @@
 from flask import Blueprint, request
 from flask_jwt_extended import jwt_required
 from middleware.is_verified_middleware import is_verified
-from controllers.auth_controller import register,save_new_password, reset,current_user, login,verify
+from controllers.auth_controller import register,save_new_password, reset,current_user, login,verify,resend_verification
 main = Blueprint('auth_blueprint', __name__)
 
 
@@ -42,4 +42,10 @@ def reset_password(email):
 def update_password(otp):
     data = request.get_json()
     result = save_new_password(data,otp)
+    return result
+
+@main.route('/new_otp', methods=["POST"])
+def send_new_otp():
+    data = request.get_json()
+    result = resend_verification(data)
     return result

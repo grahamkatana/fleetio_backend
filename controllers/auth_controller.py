@@ -5,7 +5,7 @@ from utils.send_email import send_email
 from config.bcrypt import bcrypt
 from models.User import User
 from models.OneTimePassword import OneTimePassword
-from datetime import date, datetime
+from datetime import  datetime
 from utils.validators import check_if_cell_exists, check_if_email_exists, check_if_name_exists
 from utils.database_operations import save_record
 from utils.jwt_helper import encode_jwt, get_auth_user
@@ -119,7 +119,26 @@ def verify(otp):
 
 
 def resend_verification(request):
-    print(request)
+    email = request['email']
+    check_email = User.query.filter_by(email=email).first()
+    if check_email:
+        email = check_email.email
+        get_otp = OneTimePassword.query.filter_by(
+            user_id=check_email.id).order_by(text("id desc")).first()
+        if get_otp:
+            get_otp.is_valid = False
+            db.db.session.commit()
+        generated_otp = random.randint(10000, 99999)
+        now = datetime.now(timezone.utc)
+        target_timestamp = datetime.timestamp(now + timedelta(hours=24))
+        otp_data = OneTimePassword(user_id=check_email.id, otp=generated_otp,
+                                   expires_in=datetime.fromtimestamp(target_timestamp), is_valid=True)
+        save_record(otp_data, db)
+        is_sent = send_email(
+            recipients=check_email.email, message=f"What's up {check_email.name}. Your new otp to verify your account is {generated_otp}. Use this otp within 24 hours of issue.", subject="New OTP request FleetIO", sender="app@fleetio.com")
+        return message("Please check your email.", 201)
+    else:
+        return message("Invalid information provided", 400)
 
 # ----------------------------------------------------------------------------
 # Reset password
@@ -145,6 +164,8 @@ def reset(email):
         is_sent = send_email(
             recipients=check_email.email, message=f"Greetings {check_email.name}, We have received a password reset request. Your OTP to reset the password is {generated_otp}. If you did not request the password reset, no further action is required. Your OTP is valid for 24 hours from now. If this is a suspected breach please contact us.", subject="Reset password FleetIO", sender="app@fleetio.com")
         return message("Please check your email.", 201)
+    else:
+        return message("Invalid information provided", 400)
 
 
 def save_new_password(request, otp):
