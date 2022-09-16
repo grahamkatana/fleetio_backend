@@ -1,11 +1,13 @@
 import os
-from flask import Flask, render_template, request
+from datetime import timedelta
+from flask import Flask
 from dotenv import load_dotenv
 from flask_cors import CORS
 from routes import auth_route, companies_route
 from config.db import db, migrate
 from config.mail import mail
 from config.bcrypt import bcrypt
+from config.jwt import jwt
 from utils.database_connection import get_connection_string
 
 # app declaration
@@ -18,7 +20,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = get_connection_string()
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # secret key
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
+app.config['JWT_SECRET_KEY'] = os.environ.get('SECRET_KEY')
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=2160)
 
 # mail configuration
 app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER')
@@ -33,16 +36,9 @@ db.init_app(app)
 migrate.init_app(app, db)
 mail.init_app(app)
 bcrypt.init_app(app)
+jwt.init_app(app)
 
-# db.create_all()
-
-
-# @app.route('/',methods=['GET','POST'])
-# def index():
-#     # request.method == 'POST'
-#     return '<h1>Flask</h1>'
-
-# company route
+# app routes
 app.register_blueprint(companies_route.main, url_prefix='/api/v_1/companies')
 app.register_blueprint(auth_route.main, url_prefix='/api/v_1/auth')
 

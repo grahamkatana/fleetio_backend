@@ -1,6 +1,7 @@
 
 from flask import Blueprint, jsonify, request
-from controllers.auth_controller import register
+from flask_jwt_extended import jwt_required
+from controllers.auth_controller import register,current_user
 main = Blueprint('auth_blueprint', __name__)
 
 
@@ -14,3 +15,10 @@ def register_user():
 @main.route('/login', methods=["POST"])
 def login_user():
     pass
+
+@main.route('/user', methods=["GET"])
+@jwt_required()
+def get_authenticated_user():
+    user = current_user()
+    return user
+
