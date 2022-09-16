@@ -27,9 +27,8 @@ def get_authenticated_user(args):
     user = current_user()
     return user
 
-@main.route('/verify', methods=["POST"])
+@main.route('/verify/<otp>', methods=["POST"])
 @jwt_required()
-def verify_user():
-    data = request.get_json()
-    result = verify(data)
+def verify_user(otp):
+    result = verify(otp)
     return result

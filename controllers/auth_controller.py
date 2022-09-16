@@ -5,12 +5,14 @@ from utils.send_email import send_email
 from config.bcrypt import bcrypt
 from models.User import User
 from models.OneTimePassword import OneTimePassword
-from datetime import datetime
+from datetime import date, datetime
 from utils.validators import check_if_cell_exists, check_if_email_exists, check_if_name_exists
 from utils.database_operations import save_record
 from utils.jwt_helper import encode_jwt, get_auth_user
 from datetime import timedelta
 from datetime import timezone
+from sqlalchemy.sql import text
+from utils.messages import message
 
 # ----------------------------------------------------------------------------
 # Register a user
@@ -32,15 +34,18 @@ def register(request):
         user = User(name=request['name'], email=request['email'], password=hash_password, cell=request['cell'],
                     role=request['role'], status='inactive', createdAt=datetime.now(), updatedAt=datetime.now())
         record = save_record(user, db)
-        user_id=record[0]['data']
+        user_id = record[0]['data']
         now = datetime.now(timezone.utc)
-        generated_otp = random.randint(10000,99999)
+        generated_otp = random.randint(10000, 99999)
         target_timestamp = datetime.timestamp(now + timedelta(hours=24))
-        otp_data = OneTimePassword(user_id=user_id,otp=generated_otp,expires_in=target_timestamp,is_valid=True)
-        save_record(otp_data,db)
-        identity = {'name': request['name'], 'joined': datetime.now(), 'email': request['email'], 'role': request['role'], 'cell': request['cell'], 'status': 'inactive', "email_verified_at": "",
+        otp_data = OneTimePassword(user_id=user_id, otp=generated_otp,
+                                   expires_in=datetime.fromtimestamp(target_timestamp), is_valid=True)
+        save_record(otp_data, db)
+        identity = {'name': request['name'], 'user_id': user_id, 'joined': datetime.now(), 'email': request['email'], 'role': request['role'], 'cell': request['cell'], 'status': 'inactive', "email_verified_at": "",
                     }
         token = encode_jwt(identity)
+        is_sent = send_email(
+            recipients=request['email'], message=f"Welcome {request['name']}, thank you for joining FleetIO. Your OTP is {generated_otp}. You will need this OTP to verify your email.", subject="Welcome to FleetIO", sender="app@fleetio.com")
         return jsonify({
             "data": identity,
             "jwt_token": token
@@ -64,11 +69,9 @@ def login(request):
         plain_password = request['password']
         check_password = bcrypt.check_password_hash(password, plain_password)
         if not check_password:
-            return jsonify({
-                "message": "Invalid credentials given"
-            }), 401
+            return message("Invalid credentials given", 401)
         if check_password and email:
-            identity = {'name': check_email.name, 'joined': check_email.createdAt, 'email': request['email'], 'role': check_email.role, 'cell': check_email.cell, 'status': check_email.status, "email_verified_at": check_email.email_verified_at,
+            identity = {'name': check_email.name, 'user_id': check_email.id, 'joined': check_email.createdAt, 'email': request['email'], 'role': check_email.role, 'cell': check_email.cell, 'status': check_email.status, "email_verified_at": check_email.email_verified_at,
                         }
             token = encode_jwt(identity)
             return jsonify({
@@ -76,10 +79,7 @@ def login(request):
                 "jwt_token": token
             }), 200
     else:
-
-        return jsonify({
-            "message": "The account does not exist"
-        }), 404
+        return message("The account does not exist", 404)
 
 
 # ----------------------------------------------------------------------------
@@ -96,10 +96,26 @@ def current_user():
 # Verify account
 # ----------------------------------------------------------------------------
 
-def verify(request):
-    now = datetime.now(timezone.utc)
-    target_timestamp = datetime.timestamp(now + timedelta(hours=24))
-    print(request)
+def verify(otp):
+    now = datetime.now()
+    current_user = get_auth_user()
+    user = User.query.filter_by(email=current_user['email']).first()
+    get_otp = OneTimePassword.query.filter_by(
+        user_id=user.id).order_by(text("id desc")).first()
+    if user.email_verified_at:
+        return message("This account has been verified", 409)
+    elif not int(get_otp.otp) == int(otp):
+        return message("The given otp does not match", 404)
+
+    elif get_otp.expires_in < now:
+        return message("This otp has expired", 400)
+    elif not get_otp.is_valid:
+        return message("This otp is not valid", 400)
+
+    user.email_verified_at = now
+    get_otp.is_valid = False
+    db.db.session.commit()
+    return jsonify(current_user), 200
 
 
 def resend_verification(request):
