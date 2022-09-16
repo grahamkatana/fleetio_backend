@@ -6,16 +6,15 @@ from models.User import User
 from datetime import datetime
 from utils.validators import check_if_cell_exists, check_if_email_exists, check_if_name_exists
 from utils.database_operations import save_record
-from utils.jwt_helper import encode_jwt,get_auth_user
+from utils.jwt_helper import encode_jwt, get_auth_user
 
 # ----------------------------------------------------------------------------
 # Register a user
 # ----------------------------------------------------------------------------
+
+
 def register(request):
     hash_password = bcrypt.generate_password_hash(request['password'])
-    # check_password = bcrypt.check_password_hash(hash_password,'hunter2')
-    # print(hash_password)
-    # print(check_password)
     try:
         check_email = check_if_email_exists(request['email'])
         check_cell = check_if_cell_exists(request['cell'])
@@ -29,11 +28,11 @@ def register(request):
         user = User(name=request['name'], email=request['email'], password=hash_password, cell=request['cell'],
                     role=request['role'], status='inactive', createdAt=datetime.now(), updatedAt=datetime.now())
         save_record(user, db)
-        identity = {'name': request['name'], 'email': request['email'], 'role': request['role'], 'cell': request['cell'], 'status': 'inactive', "email_verified_at": "",
+        identity = {'name': request['name'], 'joined': datetime.now(), 'email': request['email'], 'role': request['role'], 'cell': request['cell'], 'status': 'inactive', "email_verified_at": "",
                     }
         token = encode_jwt(identity)
         return jsonify({
-            "data": request,
+            "data": identity,
             "jwt_token": token
         }), 201
     except Exception as e:
@@ -44,12 +43,40 @@ def register(request):
 # ----------------------------------------------------------------------------
 # Login a user
 # ----------------------------------------------------------------------------
-def login_user(request):
-    print(request)
+
+
+def login(request):
+
+    check_email = User.query.filter_by(email=request['email']).first()
+    if check_email:
+        email = check_email.email
+        password = check_email.password
+        plain_password = request['password']
+        check_password = bcrypt.check_password_hash(password, plain_password)
+        if not check_password:
+            return jsonify({
+                "message": "Invalid credentials given"
+            }), 401
+        if check_password and email:
+            identity = {'name': check_email.name, 'joined': check_email.createdAt, 'email': request['email'], 'role': check_email.role, 'cell': check_email.cell, 'status': check_email.status, "email_verified_at": check_email.email_verified_at,
+                        }
+            token = encode_jwt(identity)
+            return jsonify({
+                "data": identity,
+                "jwt_token": token
+            }), 200
+    else:
+
+        return jsonify({
+            "message": "The account does not exist"
+        }), 404
+
 
 # ----------------------------------------------------------------------------
 # Get authenticated user
 # ----------------------------------------------------------------------------
+
+
 def current_user():
     current_user = get_auth_user()
     return jsonify(current_user), 200

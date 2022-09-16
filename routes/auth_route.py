@@ -1,7 +1,8 @@
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, request
 from flask_jwt_extended import jwt_required
-from controllers.auth_controller import register,current_user
+from middleware.is_verified_middleware import is_verified
+from controllers.auth_controller import register, current_user, login
 main = Blueprint('auth_blueprint', __name__)
 
 
@@ -14,11 +15,14 @@ def register_user():
 
 @main.route('/login', methods=["POST"])
 def login_user():
-    pass
+    data = request.get_json()
+    result = login(data)
+    return result
+
 
 @main.route('/user', methods=["GET"])
 @jwt_required()
-def get_authenticated_user():
+@is_verified
+def get_authenticated_user(args):
     user = current_user()
     return user
-
