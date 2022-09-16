@@ -45,7 +45,7 @@ def register(request):
                     }
         token = encode_jwt(identity)
         is_sent = send_email(
-            recipients=request['email'], message=f"Welcome {request['name']}, thank you for joining FleetIO. Your OTP is {generated_otp}. You will need this OTP to verify your email.", subject="Welcome to FleetIO", sender="app@fleetio.com")
+            recipients=request['email'], message=f"Hello {request['name']}! Thank you for joining FleetIO. Your OTP is {generated_otp}. You will need this OTP to verify your email. Your OTP is valid for 24 hours from now.", subject="Welcome to FleetIO", sender="app@fleetio.com")
         return jsonify({
             "data": identity,
             "jwt_token": token
