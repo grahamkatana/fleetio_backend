@@ -1,4 +1,5 @@
 from config.db import db
+from datetime import datetime
 
 
 class User(db.Model):
@@ -13,8 +14,8 @@ class User(db.Model):
     remember_token = db.Column(db.String(120), nullable=True)
     access_token = db.Column(db.String(120), nullable=True)
     status = db.Column(db.String(120), nullable=False)
-    createdAt = db.Column(db.DateTime, nullable=True)
-    updatedAt = db.Column(db.DateTime, nullable=True)
+    createdAt = db.Column(db.DateTime, nullable=True,default=datetime.utcnow())
+    updatedAt = db.Column(db.DateTime, nullable=True,default=datetime.utcnow(),onupdate=datetime.utcnow())
 
     def __repr__(self):
         return '<User %r>' % self.id

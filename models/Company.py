@@ -1,4 +1,5 @@
 from config.db import db
+from datetime import datetime
 
 
 class Company(db.Model):
@@ -13,8 +14,8 @@ class Company(db.Model):
     latitude = db.Column(db.String(80), nullable=True)
     longitude = db.Column(db.String(80), nullable=True)
     logo = db.Column(db.String(200), nullable=True)
-    createdAt = db.Column(db.DateTime, nullable=True)
-    updatedAt = db.Column(db.DateTime, nullable=True)
+    createdAt = db.Column(db.DateTime, nullable=True,default=datetime.utcnow())
+    updatedAt = db.Column(db.DateTime, nullable=True,default=datetime.utcnow(),onupdate=datetime.utcnow())
 
     def __repr__(self):
         return '<Company %r>' % self.name

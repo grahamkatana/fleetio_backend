@@ -1,12 +1,16 @@
+import random
 from flask import jsonify
 from config import db
 from utils.send_email import send_email
 from config.bcrypt import bcrypt
 from models.User import User
+from models.OneTimePassword import OneTimePassword
 from datetime import datetime
 from utils.validators import check_if_cell_exists, check_if_email_exists, check_if_name_exists
 from utils.database_operations import save_record
 from utils.jwt_helper import encode_jwt, get_auth_user
+from datetime import timedelta
+from datetime import timezone
 
 # ----------------------------------------------------------------------------
 # Register a user
@@ -27,7 +31,13 @@ def register(request):
             return check_name
         user = User(name=request['name'], email=request['email'], password=hash_password, cell=request['cell'],
                     role=request['role'], status='inactive', createdAt=datetime.now(), updatedAt=datetime.now())
-        save_record(user, db)
+        record = save_record(user, db)
+        user_id=record[0]['data']
+        now = datetime.now(timezone.utc)
+        generated_otp = random.randint(10000,99999)
+        target_timestamp = datetime.timestamp(now + timedelta(hours=24))
+        otp_data = OneTimePassword(user_id=user_id,otp=generated_otp,expires_in=target_timestamp,is_valid=True)
+        save_record(otp_data,db)
         identity = {'name': request['name'], 'joined': datetime.now(), 'email': request['email'], 'role': request['role'], 'cell': request['cell'], 'status': 'inactive', "email_verified_at": "",
                     }
         token = encode_jwt(identity)
@@ -82,7 +92,13 @@ def current_user():
     return jsonify(current_user), 200
 
 
-def verify_account(request):
+# ----------------------------------------------------------------------------
+# Verify account
+# ----------------------------------------------------------------------------
+
+def verify(request):
+    now = datetime.now(timezone.utc)
+    target_timestamp = datetime.timestamp(now + timedelta(hours=24))
     print(request)
 
 

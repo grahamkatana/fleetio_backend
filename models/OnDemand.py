@@ -1,6 +1,7 @@
 from config.db import db
 from models.Fleet import Fleet
 from models.Company import Company
+from datetime import datetime
 
 
 class OnDemand(db.Model):
@@ -12,8 +13,8 @@ class OnDemand(db.Model):
     company = db.relationship(
         Company, backref=db.backref('companies', lazy=True))
     fleet = db.relationship(Fleet, backref=db.backref('fleets', lazy=True))
-    createdAt = db.Column(db.DateTime, nullable=True)
-    updatedAt = db.Column(db.DateTime, nullable=True)
+    createdAt = db.Column(db.DateTime, nullable=True,default=datetime.utcnow())
+    updatedAt = db.Column(db.DateTime, nullable=True,default=datetime.utcnow(),onupdate=datetime.utcnow())
 
     def __repr__(self):
         return '<OnDemand %r>' % self.name

@@ -2,6 +2,7 @@ from config.db import db
 from models.Company import Company
 from models.PermitType import PermitType
 from models.TransportType import TransportType
+from datetime import datetime
 
 
 class Fleet(db.Model):
@@ -25,8 +26,8 @@ class Fleet(db.Model):
         PermitType, backref=db.backref('permittypes', lazy=True))
     tranport_type = db.relationship(
         TransportType, backref=db.backref('transporttypes', lazy=True))
-    createdAt = db.Column(db.DateTime, nullable=True)
-    updatedAt = db.Column(db.DateTime, nullable=True)
+    createdAt = db.Column(db.DateTime, nullable=True,default=datetime.utcnow())
+    updatedAt = db.Column(db.DateTime, nullable=True,default=datetime.utcnow(),onupdate=datetime.utcnow())
 
     def __repr__(self):
         return '<Fleet %r>' % self.id
