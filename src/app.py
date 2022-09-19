@@ -45,4 +45,4 @@ app.register_blueprint(auth_route.main, url_prefix='/api/v_1/auth')
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True,host='0.0.0.0')

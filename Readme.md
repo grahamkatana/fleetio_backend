@@ -1,3 +1,4 @@
+# Moved app files to src on DEV
 # DB setup
 you can use any database just install the specific drivers, this project supports pgsql and mysql as in the .env
 # Running the project
