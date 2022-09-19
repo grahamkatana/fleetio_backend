@@ -1,6 +1,11 @@
 # Moved app files to src on DEV
+# Running the container
+Run the docker-compose.yaml
+```docker-compose build```
+Then
+```docker-compose up```
 # DB setup
-you can use any database just install the specific drivers, this project supports pgsql and mysql as in the .env
+you can use any database just install the specific drivers, this project supports pgsql and mysql as in the .env or you can use docker
 # Running the project
 ### Create a virtual environmen ```python -m venv [env_name]```
 ### Activate the virtual environment
