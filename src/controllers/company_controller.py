@@ -6,10 +6,38 @@ from utils.database_operations import save_record
 from utils.rand_string_generator import get_random_string
 from utils.messages import greet_get_time, message
 from utils.file_uploads import upload_client_files
+from models.Company import Company
+from sqlalchemy.sql import text
 
 
 def index():
-    pass
+    fetched_data = []
+    companies = Company.query.filter_by(
+        active=True).order_by(text("name desc")).all()
+    for company in companies:
+        fetched_data.append({
+            'id': company.id,
+            'company_name': company.name,
+            'address': company.address,
+            'country': company.country,
+            'tags': company.tags,
+            'company_type': company.company_type,
+            'industry_type': company.industry_type,
+            'latitude': company.latitude,
+            'longitude': company.longitude,
+            'logo': company.logo,
+            'joined':company.createdAt
+
+        })
+      
+
+    if companies:
+        return jsonify({
+            "data": fetched_data
+        }), 200
+    return jsonify({
+        "data": fetched_data
+    }), 200
 
 
 def create(request, authenticated_email, name):
