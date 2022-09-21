@@ -10,6 +10,8 @@ from config.bcrypt import bcrypt
 from config.jwt import jwt
 from utils.database_connection import get_connection_string
 
+UPLOAD_FOLDER = './storage'
+
 # app declaration
 app = Flask(__name__)
 CORS(app)
@@ -30,6 +32,11 @@ app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
 app.config['MAIL_USE_TLS'] =bool(os.environ.get('MAIL_USE_TLS'))
 app.config['MAIL_USE_SSL'] = bool(os.environ.get('MAIL_USE_SSL'))
+
+# file uploads config
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+# 16 mb as max size set
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 
 # initialize the database

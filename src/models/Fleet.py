@@ -19,7 +19,7 @@ class Fleet(db.Model):
     date_registered = db.Column(db.DateTime, nullable=False)
     permit_type = db.Column(db.String(300), nullable=False)
     mileage = db.Column(db.Float, nullable=False)
-    image = db.Column(db.String(80), nullable=False)
+    image = db.Column(db.String(300), nullable=False)
     company = db.relationship(
         Company, backref=db.backref('companies', lazy=True))
     permit_type = db.relationship(

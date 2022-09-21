@@ -1,3 +1,4 @@
+from email.policy import default
 from config.db import db
 from models.Fleet import Fleet
 from models.Company import Company
@@ -8,7 +9,9 @@ class OnDemand(db.Model):
     __tablename__ = 'ondemands'
     id = db.Column(db.BigInteger, primary_key=True)
     is_booked = db.Column(db.Boolean, nullable=False)
+    is_active = db.Column(db.Boolean, nullable=False,default=False)
     company_id = db.Column(db.BigInteger, db.ForeignKey('companies.id'))
+    expires_at = db.Column(db.DateTime,nullable=False,default=datetime.utcnow())
     fleet_id = db.Column(db.BigInteger, db.ForeignKey('fleets.id'))
     company = db.relationship(
         Company, backref=db.backref('companies', lazy=True))

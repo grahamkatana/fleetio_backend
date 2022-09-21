@@ -2,6 +2,7 @@ from config.db import db
 from datetime import datetime
 
 
+
 class Company(db.Model):
     __tablename__ = 'companies'
     id = db.Column(db.BigInteger, primary_key=True)
@@ -10,6 +11,8 @@ class Company(db.Model):
     country = db.Column(db.String(80), nullable=True)
     tags = db.Column(db.String(300), nullable=True)
     active = db.Column(db.Boolean, nullable=False)
+    # individual or business if individual can register 5 maximum
+    company_type = db.Column(db.String(20),nullable=True)
     industry_type = db.Column(db.String(80), nullable=True)
     latitude = db.Column(db.String(80), nullable=True)
     longitude = db.Column(db.String(80), nullable=True)

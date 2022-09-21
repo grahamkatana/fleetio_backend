@@ -16,7 +16,7 @@ from flask_mail import Message
 # )
 # send_mail.send(email_message)
 
-
+# TODO check if there are attachments or not
 def send_email(recipients, message, subject, sender):
     
     mailable = Message(subject, sender=sender, recipients=[recipients])

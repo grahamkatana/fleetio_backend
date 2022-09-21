@@ -1,3 +1,10 @@
+'''
++----------------------------------------------------------------------------
+| Description
++----------------------------------------------------------------------------
+| Put your validation logic here and use it in any function you want
++----------------------------------------------------------------------------
+'''
 from flask import jsonify
 from models.User import User
 from utils.messages import message

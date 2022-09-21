@@ -1,6 +1,15 @@
+'''
++----------------------------------------------------------------------------
+| Description
++----------------------------------------------------------------------------
+| Get the current authenticated user and encode a jwt token
+| Encode the information to be encoded in the jwt for identity 
+| Get the information of the current authenticated user
++----------------------------------------------------------------------------
+'''
+
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import get_jwt_identity
-from flask_jwt_extended import jwt_required
 
 def encode_jwt(user):
       access_token = create_access_token(identity=user)
