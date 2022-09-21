@@ -21,6 +21,8 @@ load_dotenv()
 app.config['SQLALCHEMY_DATABASE_URI'] = get_connection_string()
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+app.config['BACKUP_DRIVE'] = os.environ.get('GOOGLE_PARENT_ID')
+
 # secret key
 app.config['JWT_SECRET_KEY'] = os.environ.get('SECRET_KEY')
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=2160)
